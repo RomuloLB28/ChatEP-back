@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 @Schema({ timestamps: true })
 export class Exercise{
     @Prop({ required: true })
-    type: 'reading' | 'listening' | 'speaking';
+    type: 'reading' | 'listening' | 'speaking' | 'writing';
 
     @Prop({ require: true})
     level: string;
@@ -25,6 +25,12 @@ export class Exercise{
 
     @Prop()
     prompt?: string;
+
+    @Prop()
+    task?: string
+
+    @Prop({ type: [String],default: []})
+    translations?: string[]
 }
 
 export type ExerciseDocument = Exercise & Document;

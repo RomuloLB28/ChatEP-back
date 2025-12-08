@@ -11,8 +11,8 @@ import {
 
 export class CreateExerciseDto {
     @IsString()
-    @IsIn(['reading','listening','speaking'])
-    type: 'reading' | 'listening' | 'speaking';
+    @IsIn(['reading','listening','speaking','writing'])
+    type: 'reading' | 'listening' | 'speaking' | 'writing';
 
     @IsString()
     level: string;
@@ -44,4 +44,14 @@ export class CreateExerciseDto {
     @ValidateIf(o => o.type === 'speaking')
     @IsString()
     prompt?: string;
+
+    //writing
+    @ValidateIf(o => o.type === 'writing')
+    @IsString()
+    task?: string;
+
+    @ValidateIf(o => o.type === 'writing')
+    @IsArray()
+    @ArrayMinSize(1)
+    translations?: string[];
 }
