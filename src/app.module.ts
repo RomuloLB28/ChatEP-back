@@ -7,7 +7,7 @@ import { ExercisesModule } from './exercises/exercises.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(
       process.env.MONGO_URI || 'mongodb://localhost:27017/chatep',
     ),
