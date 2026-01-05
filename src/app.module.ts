@@ -9,9 +9,15 @@ import { UserExercisesModule } from './user-exercises/user-exercises.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(
-      process.env.MONGO_URI || 'mongodb://localhost:27017/chatep',
-    ),
+
+    (() => {
+      const mongoUri = process.env.MONGODB_URI;
+      if (!mongoUri) {
+        throw new Error('❌ MONGODB_URI não definida');
+      }
+      return MongooseModule.forRoot(mongoUri);
+    })(),
+
     UsersModule,
     AuthModule,
     ExercisesModule,
