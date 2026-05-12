@@ -10,7 +10,7 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
   app.enableCors({
-    origin: ['https://chat-ep-front.vercel.app', 'http://localhost:3000'],
+    origin: process.env.ORIGIN_URL,
     credentials: true,
   });
   await app.listen(process.env.PORT || 4000);
