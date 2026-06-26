@@ -5,12 +5,20 @@ import { TutorProxy } from './tutor.proxy';
 export class CheckerService {
   constructor(private readonly TutorProxy: TutorProxy) {}
   async execute(text: string) {
-    const response = await this.TutorProxy.correctText(text);
+    const lines = text.split('\n');
+    
+    const correctionPromises = lines.map(async (line) => {
+      if (!line.trim()) return line;
+      const response = await this.TutorProxy.correctText(line);
+      return response.correctedText;
+    });
+
+    const correctedLines = await Promise.all(correctionPromises);
 
     return {
       originalText: text,
-      correctedText: response.correctedText,
-      feedback: response.feedback,
+      correctedText: correctedLines.join('\n'),
+      feedback: "Texto corrigido automaticamente pelo modelo.",
     };
   }
 }
