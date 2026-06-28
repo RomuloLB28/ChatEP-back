@@ -6,7 +6,11 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Post()
-  async chat(@Body('message') message: string) {
-    return this.chatService.chat(message);
+  async chat(
+    @Body('message') message: string,
+    @Body('useCustomPrompt') useCustomPrompt?: boolean,
+    @Body('customSystemPrompt') customSystemPrompt?: string,
+  ) {
+    return this.chatService.chat(message, useCustomPrompt, customSystemPrompt);
   }
 }
