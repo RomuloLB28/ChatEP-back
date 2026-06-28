@@ -7,11 +7,15 @@ const MICRO_URL = process.env.MICROSERVICE_URI;
 export class ChatProxy {
   constructor(private readonly httpService: HttpService) {}
 
-  async chat(text: string) {
+  async chat(text: string, useCustomPrompt?: boolean, customSystemPrompt?: string) {
     const response = await firstValueFrom(
       this.httpService.post(
         `${MICRO_URL}/chat`,
-        { text }, // precisa bater com request.text no FastAPI
+        { 
+          text, 
+          useCustomPrompt: useCustomPrompt ?? false, 
+          customSystemPrompt: customSystemPrompt ?? null 
+        }, 
         {
           headers: {
             'Content-Type': 'application/json',
