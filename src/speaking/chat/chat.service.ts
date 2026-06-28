@@ -5,9 +5,8 @@ import { ChatProxy } from './chat.proxy';
 export class ChatService {
   constructor(private readonly chatProxy: ChatProxy) {}
 
-  async chat(message: string) {
-    const result = await this.chatProxy.chat(message);
-
+  async chat(message: string, useCustomPrompt?: boolean, customSystemPrompt?: string) {
+    const result = await this.chatProxy.chat(message, useCustomPrompt, customSystemPrompt);
     return {
       reply: result.response,
     };
