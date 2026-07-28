@@ -24,7 +24,7 @@ export class ChatProxy {
             customSystemPrompt: customSystemPrompt ?? null,
           },
           {
-            responseType: 'stream', // Garante o recebimento como fluxo de dados continuo
+            responseType: 'stream',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -33,11 +33,35 @@ export class ChatProxy {
         .subscribe({
           next: (axiosResponse) => {
             const stream = axiosResponse.data;
+            let buffer = '';
 
-            // Ouve os pacotes de dados transmitidos pelo FastAPI
             stream.on('data', (chunk: Buffer) => {
-              const dataText = chunk.toString();
-              subscriber.next({ data: dataText } as MessageEvent);
+              buffer += chunk.toString();
+
+              // Separa os blocos SSE do FastAPI
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || ''; // Mantém a linha incompleta no buffer
+
+              for (const line of lines) {
+                let cleanLine = line.trim();
+                if (!cleanLine) continue;
+
+                // Remove o "data:" vindo do FastAPI para pegar apenas o JSON
+                if (cleanLine.startsWith('data:')) {
+                  cleanLine = cleanLine.replace(/^data:\s*/, '').trim();
+                }
+
+                if (cleanLine) {
+                  try {
+                    // Valida se é um JSON válido
+                    const parsed = JSON.parse(cleanLine);
+                    // Emite o payload limpo para o NestJS envelopar corretamente
+                    subscriber.next({ data: parsed } as MessageEvent);
+                  } catch (e) {
+                    // Se for linha de id ou parcial, ignora silenciosamente
+                  }
+                }
+              }
             });
 
             stream.on('end', () => subscriber.complete());
