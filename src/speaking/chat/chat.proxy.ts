@@ -1,29 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
+import { IncomingMessage } from 'http';
+
 const MICRO_URL = process.env.MICROSERVICE_URI;
 
 @Injectable()
 export class ChatProxy {
   constructor(private readonly httpService: HttpService) {}
 
-  async chat(text: string, useCustomPrompt?: boolean, customSystemPrompt?: string) {
-    const response = await firstValueFrom(
-      this.httpService.post(
-        `${MICRO_URL}/chat`,
-        { 
-          text, 
-          useCustomPrompt: useCustomPrompt ?? false, 
-          customSystemPrompt: customSystemPrompt ?? null 
-        }, 
-        {
-          headers: {
-            'Content-Type': 'application/json',
+  chat(
+    text: string,
+    useCustomPrompt?: boolean,
+    customSystemPrompt?: string,
+  ): Observable<MessageEvent> {
+    return new Observable((subscriber) => {
+      this.httpService
+        .post<IncomingMessage>(
+          `${MICRO_URL}/chat`,
+          {
+            text,
+            useCustomPrompt: useCustomPrompt ?? false,
+            customSystemPrompt: customSystemPrompt ?? null,
           },
-        },
-      ),
-    );
+          {
+            responseType: 'stream', // Garante o recebimento como fluxo de dados continuo
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        )
+        .subscribe({
+          next: (axiosResponse) => {
+            const stream = axiosResponse.data;
 
-    return response.data;
+            // Ouve os pacotes de dados transmitidos pelo FastAPI
+            stream.on('data', (chunk: Buffer) => {
+              const dataText = chunk.toString();
+              subscriber.next({ data: dataText } as MessageEvent);
+            });
+
+            stream.on('end', () => subscriber.complete());
+            stream.on('error', (err) => subscriber.error(err));
+          },
+          error: (err) => subscriber.error(err),
+        });
+    });
   }
 }
