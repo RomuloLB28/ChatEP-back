@@ -118,6 +118,9 @@ https://github.com/RomuloLB28/ChatEP
 
 https://github.com/RomuloLB28/chatep-microservice
 
+## Link para o Artigo do projeto:
+https://sol.sbc.org.br/index.php/ideia/article/view/43456
+
 ```
 
 ```
